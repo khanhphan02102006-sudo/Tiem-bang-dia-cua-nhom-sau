@@ -1,0 +1,83 @@
+﻿@model VideoRentalMVC.Models.Phim
+
+@{
+    ViewData["Title"] = "Chỉnh sửa phim";
+    var placeholder = Url.Content("~/images/poster-placeholder.svg");
+    var currentPoster = string.IsNullOrWhiteSpace(Model.AnhBiaUrl) ? placeholder : Model.AnhBiaUrl;
+}
+
+<h2 class="page-title mb-3">Chỉnh sửa phim</h2>
+
+<div class="row fade-in-up">
+    <div class="col-lg-7">
+        <div class="form-shell">
+            <div class="detail-topbar">
+                <h5 class="section-header mb-0">Thông tin phim</h5>
+                <span class="soft-badge neutral">Mã phim: #@Model.Id</span>
+            </div>
+
+            <form asp-action="Edit" enctype="multipart/form-data">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group mb-2">
+                    <label asp-for="TenPhim" class="control-label"></label>
+                    <input asp-for="TenPhim" class="form-control" />
+                    <span asp-validation-for="TenPhim" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="AnhBiaUrl" class="control-label"></label>
+                    <input asp-for="AnhBiaUrl" class="form-control mb-2" placeholder="https://..." data-poster-input />
+                    <div class="poster-upload-row mb-2">
+                        <label class="btn btn-outline-secondary poster-upload-btn mb-0">
+                            <i class="bi bi-upload me-1"></i>Tải ảnh từ máy
+                            <input type="file" class="d-none" accept="image/*" name="posterUpload" data-poster-file />
+                        </label>
+                        <small class="form-text text-muted">Nếu chọn ảnh mới, hệ thống sẽ dùng ảnh tải lên thay cho URL hiện tại.</small>
+                    </div>
+                    <span asp-validation-for="AnhBiaUrl" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <img id="posterPreviewImage" data-placeholder="@placeholder" src="@currentPoster" class="poster-large" alt="Preview" />
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="NuocSanXuat" class="control-label"></label>
+                    <input asp-for="NuocSanXuat" class="form-control" />
+                    <span asp-validation-for="NuocSanXuat" class="text-danger"></span>
+                </div>
+                <div class="form-group form-check mb-2">
+                    <label class="form-check-label">
+                        <input class="form-check-input" asp-for="PhimBoLe" /> @Html.DisplayNameFor(model => model.PhimBoLe)
+                    </label>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="GiaVon" class="control-label"></label>
+                    <input asp-for="GiaVon" class="form-control" />
+                    <span asp-validation-for="GiaVon" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="MoTa" class="control-label"></label>
+                    <input asp-for="MoTa" class="form-control" />
+                    <span asp-validation-for="MoTa" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="NamSanXuat" class="control-label"></label>
+                    <input asp-for="NamSanXuat" class="form-control" />
+                    <span asp-validation-for="NamSanXuat" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="TheLoai" class="control-label"></label>
+                    <input asp-for="TheLoai" class="form-control" />
+                    <span asp-validation-for="TheLoai" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3 action-bar">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>Lưu thay đổi</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -1,0 +1,51 @@
+@model VideoRentalMVC.Models.Bang
+
+@{
+    ViewData["Title"] = "Xóa băng";
+    var canDelete = (bool?)ViewBag.CanDelete ?? true;
+    var relatedRentalsCount = (int?)ViewBag.RelatedRentalsCount ?? 0;
+}
+
+<h2 class="page-title mb-3">Xóa băng</h2>
+
+<div class="glass-panel p-3 fade-in-up">
+    <div class="detail-topbar">
+        <h5 class="section-header mb-0">Xác nhận xóa</h5>
+        <span class="soft-badge danger">Mã băng: #@Model.Id</span>
+    </div>
+
+    @if (canDelete)
+    {
+        <p class="text-danger fw-semibold mb-3">Bạn có chắc muốn xóa băng này không?</p>
+    }
+    else
+    {
+        <p class="text-warning fw-semibold mb-2">Không thể xóa băng này vì đang có phiếu thuê liên quan.</p>
+        <p class="text-muted mb-3">Số phiếu thuê liên quan: <strong>@relatedRentalsCount</strong></p>
+    }
+
+    <dl class="row info-grid mb-2">
+        <dt class="col-sm-3">Phim</dt>
+        <dd class="col-sm-9">@(Model.Phim?.TenPhim)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TenBang)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TenBang)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TinhTrang)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TinhTrang)</dd>
+    </dl>
+
+    <form asp-action="Delete" class="action-bar mt-3 @(canDelete ? "js-confirm-submit" : string.Empty)" data-confirm-message="Bạn có chắc muốn xóa băng này?">
+        <input type="hidden" asp-for="Id" />
+        @if (canDelete)
+        {
+            <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Xóa</button>
+        }
+        else
+        {
+            <button type="button" class="btn btn-danger" data-bs-toggle="tooltip" data-bs-title="Không thể xóa vì có phiếu thuê liên quan"><i class="bi bi-trash me-1"></i>Xóa</button>
+            <a asp-controller="Thues" asp-action="Index" asp-route-searchString="@Model.TenBang" class="btn btn-outline-warning"><i class="bi bi-link-45deg me-1"></i>Xem phiếu thuê liên quan</a>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+    </form>
+</div>

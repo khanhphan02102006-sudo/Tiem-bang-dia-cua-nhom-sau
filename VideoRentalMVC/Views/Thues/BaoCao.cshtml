@@ -1,0 +1,302 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    var topPhim = ViewBag.TopPhim as IEnumerable<dynamic>;
+    var topKhach = ViewBag.TopKhach as IEnumerable<dynamic>;
+    var phieuQuaHan = ViewBag.PhieuQuaHan as IEnumerable<VideoRentalMVC.Models.Thue>;
+    var period = (string?)ViewBag.Period ?? "month";
+}
+
+<div class="dashboard-shell">
+    <div class="dashboard-topbar d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+        <h2 class="mb-0">Dashboard</h2>
+        <div class="dashboard-top-actions d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-danger" asp-action="QuaHan">Phiếu quá hạn</a>
+            <a class="btn btn-outline-dark dashboard-btn-darkfix" asp-action="ExportCsv">Xuất CSV phiếu thuê</a>
+        </div>
+    </div>
+
+    <div class="dashboard-period-tabs mb-3 d-flex flex-wrap gap-2">
+        <a class="btn btn-sm period-tab @(period == "week" ? "btn-primary" : "btn-outline-primary")" asp-action="BaoCao" asp-route-period="week">7 ngày</a>
+        <a class="btn btn-sm period-tab @(period == "month" ? "btn-primary" : "btn-outline-primary")" asp-action="BaoCao" asp-route-period="month">Tháng</a>
+        <a class="btn btn-sm period-tab @(period == "quarter" ? "btn-primary" : "btn-outline-primary")" asp-action="BaoCao" asp-route-period="quarter">3 tháng</a>
+        <a class="btn btn-sm period-tab @(period == "year" ? "btn-primary" : "btn-outline-primary")" asp-action="BaoCao" asp-route-period="year">Năm</a>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-3">
+            <div class="card border-primary dashboard-card stat-card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Tổng phim</h6>
+                    <h3 class="stat-value">@ViewBag.TongPhim</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info dashboard-card stat-card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Tổng băng</h6>
+                    <h3 class="stat-value">@ViewBag.TongBang</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning dashboard-card stat-card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Đang thuê</h6>
+                    <h3 class="stat-value">@ViewBag.DangThue</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger dashboard-card stat-card">
+                <div class="card-body text-center">
+                    <h6 class="text-muted">Quá hạn</h6>
+                    <h3 class="stat-value">@ViewBag.QuaHan</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="card border-success dashboard-card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Tổng doanh thu</h6>
+                    <h4 class="stat-value">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", (decimal)ViewBag.TongDoanhThu)</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-info dashboard-card stat-card">
+                <div class="card-body">
+                    <h6 class="text-muted">Doanh thu @ViewBag.KyLabel</h6>
+                    <h4 class="stat-value">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", (decimal)ViewBag.DoanhThuKy)</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+        <div class="col-xl-8 col-lg-7">
+            <div class="card dashboard-card chart-card">
+                <div class="card-header">Biểu đồ doanh thu 6 tháng gần nhất</div>
+                <div class="card-body">
+                    <div class="chart-skeleton" id="revenueChartSkeleton"></div>
+                    <canvas id="revenueChart" height="110" style="display:none;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-5">
+            <div class="card dashboard-card chart-card">
+                <div class="card-header">Tình trạng băng</div>
+                <div class="card-body">
+                    <div class="chart-skeleton" id="statusChartSkeleton"></div>
+                    <canvas id="statusChart" height="110" style="display:none;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-xl-4">
+            <div class="card dashboard-card">
+                <div class="card-header">Top 5 phim được thuê nhiều</div>
+                <ul class="list-group list-group-flush dashboard-list">
+                    @if (topPhim != null && topPhim.Any())
+                    {
+                        foreach (var item in topPhim)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>@item.Ten</span>
+                                <span class="badge bg-primary">@item.SoLan</span>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">Chưa có dữ liệu.</li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card dashboard-card">
+                <div class="card-header">Top 5 khách thuê nhiều</div>
+                <ul class="list-group list-group-flush dashboard-list">
+                    @if (topKhach != null && topKhach.Any())
+                    {
+                        foreach (var item in topKhach)
+                        {
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span>@item.Ten</span>
+                                <span class="badge bg-success">@item.SoLan</span>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">Chưa có dữ liệu.</li>
+                    }
+                </ul>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card dashboard-card">
+                <div class="card-header">5 phiếu quá hạn gần nhất</div>
+                <ul class="list-group list-group-flush dashboard-list">
+                    @if (phieuQuaHan != null && phieuQuaHan.Any())
+                    {
+                        foreach (var item in phieuQuaHan)
+                        {
+                            <li class="list-group-item">
+                                <div class="fw-semibold">@(item.MaKhachNavigation?.TenKhach)</div>
+                                <div class="small text-muted">@(item.MaBangNavigation?.TenBang) - Hạn: @item.HanTra.ToString("dd/MM/yyyy")</div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li class="list-group-item text-muted">Không có phiếu quá hạn.</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const revenueLabels = @Html.Raw(ViewBag.RevenueLabelsJson ?? "[]");
+        const revenueValues = @Html.Raw(ViewBag.RevenueValuesJson ?? "[]");
+        const statusLabels = @Html.Raw(ViewBag.StatusLabelsJson ?? "[]");
+        const statusValues = @Html.Raw(ViewBag.StatusValuesJson ?? "[]");
+
+        function ensureChartJs() {
+            if (window.Chart) return Promise.resolve();
+
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector('script[data-chartjs="true"]');
+                if (existing) {
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', reject, { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                script.defer = true;
+                script.dataset.chartjs = 'true';
+                script.onload = () => resolve();
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        function renderCharts() {
+            const isDark = document.body.classList.contains('dark-theme');
+            const axisColor = isDark ? '#bcd2f3' : '#445a80';
+            const gridColor = isDark ? 'rgba(156, 186, 233, 0.18)' : 'rgba(46, 72, 132, 0.14)';
+            const legendColor = isDark ? '#dfeeff' : '#334a74';
+            const tooltipBg = isDark ? 'rgba(14, 28, 52, 0.94)' : 'rgba(255, 255, 255, 0.96)';
+            const tooltipBorder = isDark ? 'rgba(133, 169, 231, 0.5)' : 'rgba(91, 130, 199, 0.35)';
+
+            const revenueCtx = document.getElementById('revenueChart');
+            const revenueSkeleton = document.getElementById('revenueChartSkeleton');
+            if (revenueCtx) {
+                revenueCtx.style.display = '';
+                if (revenueSkeleton) revenueSkeleton.style.display = 'none';
+                new Chart(revenueCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: revenueLabels,
+                        datasets: [{
+                            label: 'Doanh thu (VNĐ)',
+                            data: revenueValues,
+                            backgroundColor: isDark ? 'rgba(103, 158, 244, 0.62)' : 'rgba(13, 110, 253, 0.6)',
+                            borderColor: isDark ? 'rgba(155, 196, 255, 0.95)' : 'rgba(13, 110, 253, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        animation: {
+                            duration: 180,
+                            easing: 'linear'
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                titleColor: legendColor,
+                                bodyColor: legendColor,
+                                backgroundColor: tooltipBg,
+                                borderColor: tooltipBorder,
+                                borderWidth: 1
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: { color: axisColor },
+                                grid: { color: gridColor }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: axisColor },
+                                grid: { color: gridColor }
+                            }
+                        }
+                    }
+                });
+            }
+
+            const statusCtx = document.getElementById('statusChart');
+            const statusSkeleton = document.getElementById('statusChartSkeleton');
+            if (statusCtx) {
+                statusCtx.style.display = '';
+                if (statusSkeleton) statusSkeleton.style.display = 'none';
+                new Chart(statusCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusLabels,
+                        datasets: [{
+                            data: statusValues,
+                            backgroundColor: ['#198754', '#ffc107', '#dc3545', '#6c757d']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        animation: {
+                            duration: 180,
+                            easing: 'linear'
+                        },
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: legendColor,
+                                    usePointStyle: true,
+                                    boxWidth: 10
+                                }
+                            },
+                            tooltip: {
+                                titleColor: legendColor,
+                                bodyColor: legendColor,
+                                backgroundColor: tooltipBg,
+                                borderColor: tooltipBorder,
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        ensureChartJs().then(() => {
+            if ('requestIdleCallback' in window) {
+                requestIdleCallback(() => renderCharts(), { timeout: 300 });
+            } else {
+                requestAnimationFrame(() => renderCharts());
+            }
+        });
+    </script>
+}

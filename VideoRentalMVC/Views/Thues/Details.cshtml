@@ -1,0 +1,123 @@
+@model VideoRentalMVC.Models.Thue
+
+@{
+    ViewData["Title"] = "Chi tiết phiếu thuê";
+    var quaHan = Model.NgayTra == null && Model.HanTra.Date < DateTime.Today;
+    var soNgayThue = Math.Max(1, ((Model.NgayTra ?? DateTime.Today).Date - Model.NgayThue.Date).Days + 1);
+    var soNgayTre = Math.Max(0, ((Model.NgayTra ?? DateTime.Today).Date - Model.HanTra.Date).Days);
+
+    var tongNgayDuKien = Math.Max(1, (Model.HanTra.Date - Model.NgayThue.Date).Days + 1);
+    var soNgayDaQua = Math.Max(1, ((Model.NgayTra ?? DateTime.Today).Date - Model.NgayThue.Date).Days + 1);
+    var tienDo = Model.NgayTra != null
+        ? 100
+        : Math.Clamp((int)Math.Round(soNgayDaQua * 100.0 / tongNgayDuKien), 0, 100);
+
+    var copyText = $"Phiếu #{Model.Id} | Băng: {Model.MaBangNavigation?.TenBang} | Khách: {Model.MaKhachNavigation?.TenKhach} | Ngày thuê: {Model.NgayThue:dd/MM/yyyy} | Hạn trả: {Model.HanTra:dd/MM/yyyy} | Tổng tiền: {Model.TongTien:N0} đ";
+}
+
+<h2 class="page-title mb-3">Chi tiết phiếu thuê</h2>
+
+<div class="glass-panel p-3 fade-in-up">
+    <div class="detail-topbar">
+        <h5 class="section-header mb-0">Thông tin phiếu</h5>
+        <span class="soft-badge neutral">Mã phiếu: #@Model.Id</span>
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-md-4">
+            <div class="stat-tile">
+                <div class="label">Số ngày thuê</div>
+                <div class="value">@soNgayThue ngày</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-tile">
+                <div class="label">Trễ hạn</div>
+                <div class="value @(soNgayTre > 0 ? "text-danger" : "text-success")">@soNgayTre ngày</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-tile">
+                <div class="label">Tiền hiện tại</div>
+                <div class="value">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", Model.TongTien)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Tiến độ thuê</span>
+            <span>@tienDo%</span>
+        </div>
+        <div class="progress progress-soft">
+            <div class="progress-bar @(quaHan ? "bg-danger" : "bg-primary")" role="progressbar" style="width:@tienDo%"></div>
+        </div>
+    </div>
+
+    <div class="rental-timeline mb-3">
+        <div class="timeline-item done">Tạo phiếu</div>
+        <div class="timeline-item @(Model.NgayTra == null ? "active" : "done")">Đang thuê</div>
+        <div class="timeline-item @(quaHan ? "danger" : (Model.NgayTra != null ? "done" : ""))">Quá hạn</div>
+        <div class="timeline-item @(Model.NgayTra != null ? "done" : "")">Đã trả</div>
+    </div>
+
+    <dl class="row info-grid mb-2">
+        <dt class="col-sm-3">Băng</dt>
+        <dd class="col-sm-9">@(Model.MaBangNavigation?.TenBang)</dd>
+
+        <dt class="col-sm-3">Khách</dt>
+        <dd class="col-sm-9">@(Model.MaKhachNavigation?.TenKhach)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NgayThue)</dt>
+        <dd class="col-sm-9">@Model.NgayThue.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.HanTra)</dt>
+        <dd class="col-sm-9">@Model.HanTra.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NgayTra)</dt>
+        <dd class="col-sm-9">@(Model.NgayTra?.ToString("dd/MM/yyyy") ?? "-")</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PhiTreHan)</dt>
+        <dd class="col-sm-9">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", Model.PhiTreHan)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TongTien)</dt>
+        <dd class="col-sm-9 fw-semibold">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", Model.TongTien)</dd>
+
+        <dt class="col-sm-3">Trạng thái</dt>
+        <dd class="col-sm-9">
+            @if (Model.NgayTra != null)
+            {
+                <span class="soft-badge success">Đã trả</span>
+            }
+            else if (quaHan)
+            {
+                <span class="soft-badge danger">Quá hạn</span>
+            }
+            else
+            {
+                <span class="soft-badge warning">Đang thuê</span>
+            }
+        </dd>
+    </dl>
+
+    <div class="action-bar mt-3">
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil-square me-1"></i>Sửa</a>
+
+            if (Model.NgayTra == null)
+            {
+                <form asp-action="GiaHan" method="post" class="d-inline-flex align-items-center gap-2">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="id" value="@Model?.Id" />
+                    <input type="number" name="soNgay" value="3" min="1" max="30" class="form-control form-control-sm input-compact" />
+                    <button type="submit" class="btn btn-sm btn-outline-primary"><i class="bi bi-calendar-plus me-1"></i>Gia hạn</button>
+                </form>
+            }
+        }
+
+        <button type="button" class="btn btn-outline-info btn-sm js-copy-btn" data-copy-text="@copyText"><i class="bi bi-clipboard me-1"></i>Sao chép</button>
+        <button type="button" class="btn btn-outline-dark btn-sm" onclick="window.print()"><i class="bi bi-printer me-1"></i>In phiếu</button>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+    </div>
+</div>

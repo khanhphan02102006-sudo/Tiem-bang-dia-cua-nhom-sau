@@ -1,0 +1,50 @@
+@model VideoRentalMVC.Models.Bang
+
+@{
+    ViewData["Title"] = "Chi tiết băng";
+}
+
+<h2 class="page-title mb-3">Chi tiết băng</h2>
+
+<div class="glass-panel p-3 fade-in-up">
+    <div class="detail-topbar">
+        <h5 class="section-header mb-0">Thông tin băng</h5>
+        <span class="soft-badge neutral">Mã băng: #@Model.Id</span>
+    </div>
+
+    <dl class="row info-grid mb-2">
+        <dt class="col-sm-3">Phim</dt>
+        <dd class="col-sm-9">@(Model.Phim?.TenPhim)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TenBang)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TenBang)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TinhTrang)</dt>
+        <dd class="col-sm-9">
+            @switch (Model.TinhTrang)
+            {
+                case "Có sẵn":
+                    <span class="soft-badge success">Có sẵn</span>
+                    break;
+                case "Đang thuê":
+                    <span class="soft-badge warning">Đang thuê</span>
+                    break;
+                case "Hỏng":
+                case "Mất":
+                    <span class="soft-badge danger">@Model.TinhTrang</span>
+                    break;
+                default:
+                    <span class="soft-badge">@Model.TinhTrang</span>
+                    break;
+            }
+        </dd>
+    </dl>
+
+    <div class="action-bar mt-3">
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil-square me-1"></i>Sửa</a>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+    </div>
+</div>

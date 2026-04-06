@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="600" viewBox="0 0 400 600" fill="none">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d6efd"/>
+      <stop offset="100%" stop-color="#6610f2"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="600" rx="24" fill="url(#g)"/>
+  <rect x="40" y="60" width="320" height="420" rx="16" fill="rgba(255,255,255,0.12)"/>
+  <circle cx="200" cy="220" r="64" fill="rgba(255,255,255,0.35)"/>
+  <rect x="120" y="340" width="160" height="18" rx="9" fill="rgba(255,255,255,0.45)"/>
+  <rect x="95" y="370" width="210" height="14" rx="7" fill="rgba(255,255,255,0.3)"/>
+  <text x="200" y="530" text-anchor="middle" font-family="Segoe UI, Arial" font-size="30" fill="white" opacity="0.95">NO POSTER</text>
+</svg>

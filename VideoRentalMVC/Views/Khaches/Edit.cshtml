@@ -1,0 +1,45 @@
+@model VideoRentalMVC.Models.Khach
+
+@{
+    ViewData["Title"] = "Chỉnh sửa khách";
+}
+
+<h2 class="page-title mb-3">Chỉnh sửa khách</h2>
+
+<div class="row fade-in-up">
+    <div class="col-lg-6">
+        <div class="form-shell">
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group mb-2">
+                    <label asp-for="TenKhach" class="control-label"></label>
+                    <input asp-for="TenKhach" class="form-control" />
+                    <span asp-validation-for="TenKhach" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label asp-for="DiaChi" class="control-label"></label>
+                    <input asp-for="DiaChi" class="form-control" />
+                    <span asp-validation-for="DiaChi" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-2">
+                    <label asp-for="DienThoai" class="control-label"></label>
+                    <input asp-for="DienThoai" class="form-control" />
+                    <span asp-validation-for="DienThoai" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mt-3 action-bar">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>Lưu thay đổi</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

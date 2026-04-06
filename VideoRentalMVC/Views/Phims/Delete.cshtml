@@ -1,0 +1,42 @@
+﻿@model VideoRentalMVC.Models.Phim
+
+@{
+    ViewData["Title"] = "Xóa phim";
+}
+
+<h2 class="page-title mb-3">Xóa phim</h2>
+
+<div class="glass-panel p-3 fade-in-up">
+    <div class="detail-topbar">
+        <h5 class="section-header mb-0">Xác nhận xóa</h5>
+        <span class="soft-badge danger">Mã phim: #@Model.Id</span>
+    </div>
+
+    <p class="text-danger fw-semibold mb-3">Bạn có chắc muốn xóa phim này không?</p>
+
+    <dl class="row info-grid mb-2">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TenPhim)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TenPhim)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NuocSanXuat)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.NuocSanXuat)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PhimBoLe)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.PhimBoLe)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.GiaVon)</dt>
+        <dd class="col-sm-9">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", Model.GiaVon)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.NamSanXuat)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.NamSanXuat)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TheLoai)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TheLoai)</dd>
+    </dl>
+
+    <form asp-action="Delete" class="action-bar mt-3 js-confirm-submit" data-confirm-message="Bạn có chắc muốn xóa phim này?">
+        <input type="hidden" asp-for="Id" />
+        <button type="submit" class="btn btn-danger"><i class="bi bi-trash me-1"></i>Xóa</button>
+        <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+    </form>
+</div>

@@ -1,0 +1,162 @@
+@model IEnumerable<VideoRentalMVC.Models.Bang>
+
+@{
+    ViewData["Title"] = "Danh sách B?ng";
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+    var pageSize = (int)ViewBag.PageSize;
+    var totalItems = (int)ViewBag.TotalItems;
+    var countCoSan = Model.Count(x => x.TinhTrang == "Có s?n");
+    var countDangThue = Model.Count(x => x.TinhTrang == "?ang thuê");
+    var countHongMat = Model.Count(x => x.TinhTrang == "H?ng" || x.TinhTrang == "M?t");
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 fade-in-up">
+    <h2 class="fw-bold text-primary mb-0">@ViewData["Title"]</h2>
+    @if (User.IsInRole("Admin"))
+    {
+        <a class="btn btn-success" asp-action="Create"><i class="bi bi-plus-circle me-1"></i>Thêm b?ng</a>
+    }
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-2 align-items-center" id="bangStatusFilters">
+    <button type="button" class="soft-badge info bang-status-filter is-active" data-filter="all"><i class="bi bi-collection me-1"></i>T?ng hình th?c: @Model.Count()</button>
+    <button type="button" class="soft-badge success bang-status-filter" data-filter="available">Có s?n: @countCoSan</button>
+    <button type="button" class="soft-badge warning bang-status-filter" data-filter="rented">?ang thuê: @countDangThue</button>
+    <button type="button" class="soft-badge danger bang-status-filter" data-filter="damagedlost">H?ng/M?t: @countHongMat</button>
+</div>
+
+<form method="get" class="row g-2 mb-2 js-stateful-filter" data-list-key="bangs-index">
+    <div class="col-md-6">
+        <input type="text" name="searchString" value="@ViewBag.CurrentFilter" class="form-control" placeholder="Tìm theo tên b?ng, tình tr?ng, tên phim" />
+    </div>
+    <div class="col-md-6">
+        <button type="submit" class="btn btn-primary">Tìm</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa l?c</a>
+    </div>
+</form>
+<small class="text-muted d-block mb-3">Tìm theo tên b?ng, tr?ng thái ho?c tên phim ?? l?c nhanh.</small>
+
+@if (Model.Any())
+{
+    <div class="card shadow-sm fade-in-up">
+        <div class="card-body p-0">
+            <div class="table-shell">
+                <table class="table table-bordered table-striped table-hover mb-0 ui-table-modern table-sticky">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="sticky-first">Phim</th>
+                            <th><a class="text-white" asp-action="Index" asp-route-sortOrder="@ViewBag.NameSort" asp-route-searchString="@ViewBag.CurrentFilter">@Html.DisplayNameFor(model => model.TenBang)</a></th>
+                            <th><a class="text-white" asp-action="Index" asp-route-sortOrder="@ViewBag.StatusSort" asp-route-searchString="@ViewBag.CurrentFilter">@Html.DisplayNameFor(model => model.TinhTrang)</a></th>
+                            <th class="sticky-action text-center">Hành ??ng</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bangTableBody">
+                        @foreach (var item in Model)
+                        {
+                            var statusKey = item.TinhTrang == "Có s?n" ? "available" : item.TinhTrang == "Ðang thuê" ? "rented" : item.TinhTrang == "H?ng" || item.TinhTrang == "M?t" ? "damagedlost" : "other";
+                            <tr data-status="@statusKey">
+                                <td class="sticky-first">@(item.Phim?.TenPhim)</td>
+                                <td class="fw-medium">@Html.DisplayFor(modelItem => item.TenBang)</td>
+                                <td>
+                                    @switch (item.TinhTrang)
+                                    {
+                                        case "Có s?n":
+                                            <span class="soft-badge success">Có s?n</span>
+                                            break;
+                                        case "Ðang thuê":
+                                            <span class="soft-badge warning">Ðang thuê</span>
+                                            break;
+                                        case "H?ng":
+                                            <span class="soft-badge danger">H?ng</span>
+                                            break;
+                                        case "M?t":
+                                            <span class="soft-badge neutral">M?t</span>
+                                            break;
+                                        default:
+                                            <span class="soft-badge neutral">@item.TinhTrang</span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="sticky-action text-center">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info me-1 action-icon-btn icon-action-link action-view" aria-label="Chi ti?t" data-bs-toggle="tooltip" data-bs-title="Chi ti?t"><i class="bi bi-eye"></i></a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1 action-icon-btn icon-action-link action-edit" aria-label="S?a" data-bs-toggle="tooltip" data-bs-title="S?a"><i class="bi bi-pencil-square"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger action-icon-btn icon-action-link action-delete" aria-label="Xóa" data-bs-toggle="tooltip" data-bs-title="Xóa"><i class="bi bi-trash"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="icon">??</div>
+        <div>Chua có bang nào d? hi?n th?.</div>
+    </div>
+}
+
+@if (totalPages > 1)
+{
+    var fromItem = (currentPage - 1) * pageSize + 1;
+    var toItem = Math.Min(currentPage * pageSize, totalItems);
+
+    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+        <small class="text-muted">Hi?n th? @fromItem - @toItem / @totalItems b?n ghi</small>
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item @(currentPage == 1 ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Ð?u</a>
+                </li>
+                <li class="page-item @(currentPage == 1 ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Math.Max(1, currentPage - 1))" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Tru?c</a>
+                </li>
+                @for (var i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : string.Empty)">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">@i</a>
+                    </li>
+                }
+                <li class="page-item @(currentPage == totalPages ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Math.Min(totalPages, currentPage + 1))" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Sau</a>
+                </li>
+                <li class="page-item @(currentPage == totalPages ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@totalPages" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Cu?i</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filterRoot = document.getElementById("bangStatusFilters");
+    const body = document.getElementById("bangTableBody");
+    if (!filterRoot || !body) {
+        return;
+    }
+
+    const buttons = Array.from(filterRoot.querySelectorAll(".bang-status-filter"));
+    const rows = Array.from(body.querySelectorAll("tr[data-status]"));
+
+    buttons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const filter = btn.getAttribute("data-filter") || "all";
+            buttons.forEach(x => x.classList.remove("is-active"));
+            btn.classList.add("is-active");
+
+            rows.forEach(row => {
+                const status = row.getAttribute("data-status") || "other";
+                const show = filter === "all" || filter === status;
+                row.style.display = show ? "" : "none";
+            });
+        });
+    });
+});
+</script>

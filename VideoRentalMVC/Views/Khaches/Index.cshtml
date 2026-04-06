@@ -1,0 +1,109 @@
+@model IEnumerable<VideoRentalMVC.Models.Khach>
+
+@{
+    ViewData["Title"] = "Danh sách Khách";
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalPages = (int)ViewBag.TotalPages;
+    var pageSize = (int)ViewBag.PageSize;
+    var totalItems = (int)ViewBag.TotalItems;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 fade-in-up">
+    <h2 class="fw-bold text-primary mb-0">@ViewData["Title"]</h2>
+    @if (User.IsInRole("Admin"))
+    {
+        <a class="btn btn-success" asp-action="Create"><i class="bi bi-plus-circle me-1"></i>Thêm khách</a>
+    }
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-2 align-items-center">
+    <span class="soft-badge info"><i class="bi bi-people me-1"></i>Tổng hiển thị: @Model.Count()</span>
+</div>
+
+<form method="get" class="row g-2 mb-2 js-stateful-filter" data-list-key="khaches-index">
+    <div class="col-md-6">
+        <input type="text" name="searchString" value="@ViewBag.CurrentFilter" class="form-control" placeholder="Tìm theo tên, địa chỉ, điện thoại" />
+    </div>
+    <div class="col-md-6">
+        <button type="submit" class="btn btn-primary">Tìm</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Xóa lọc</a>
+    </div>
+</form>
+<small class="text-muted d-block mb-3">Tìm theo tên, địa chỉ hoặc số điện thoại để lọc nhanh.</small>
+
+@if (Model.Any())
+{
+    <div class="card shadow-sm fade-in-up">
+        <div class="card-body p-0">
+            <div class="table-shell">
+                <table class="table table-bordered table-striped table-hover mb-0 ui-table-modern table-sticky">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="sticky-first"><a class="text-white" asp-action="Index" asp-route-sortOrder="@ViewBag.NameSort" asp-route-searchString="@ViewBag.CurrentFilter">@Html.DisplayNameFor(model => model.TenKhach)</a></th>
+                            <th>@Html.DisplayNameFor(model => model.DiaChi)</th>
+                            <th><a class="text-white" asp-action="Index" asp-route-sortOrder="@ViewBag.PhoneSort" asp-route-searchString="@ViewBag.CurrentFilter">@Html.DisplayNameFor(model => model.DienThoai)</a></th>
+                            <th class="sticky-action text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="sticky-first fw-medium">@Html.DisplayFor(modelItem => item.TenKhach)</td>
+                                <td>@Html.DisplayFor(modelItem => item.DiaChi)</td>
+                                <td>@Html.DisplayFor(modelItem => item.DienThoai)</td>
+                                <td class="sticky-action text-center">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info me-1 action-icon-btn icon-action-link action-view" aria-label="Chi tiết" data-bs-toggle="tooltip" data-bs-title="Chi tiết"><i class="bi bi-eye"></i></a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1 action-icon-btn icon-action-link action-edit" aria-label="Sửa" data-bs-toggle="tooltip" data-bs-title="Sửa"><i class="bi bi-pencil-square"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger action-icon-btn icon-action-link action-delete" aria-label="Xóa" data-bs-toggle="tooltip" data-bs-title="Xóa"><i class="bi bi-trash"></i></a>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="icon">👤</div>
+        <div>Chưa có khách nào trong danh sách.</div>
+    </div>
+}
+
+@if (totalPages > 1)
+{
+    var fromItem = (currentPage - 1) * pageSize + 1;
+    var toItem = Math.Min(currentPage * pageSize, totalItems);
+
+    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+        <small class="text-muted">Hiển thị @fromItem - @toItem / @totalItems bản ghi</small>
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item @(currentPage == 1 ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Đầu</a>
+                </li>
+                <li class="page-item @(currentPage == 1 ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Math.Max(1, currentPage - 1))" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Trước</a>
+                </li>
+                @for (var i = 1; i <= totalPages; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : string.Empty)">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">@i</a>
+                    </li>
+                }
+                <li class="page-item @(currentPage == totalPages ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Math.Min(totalPages, currentPage + 1))" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Sau</a>
+                </li>
+                <li class="page-item @(currentPage == totalPages ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@totalPages" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort">Cuối</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

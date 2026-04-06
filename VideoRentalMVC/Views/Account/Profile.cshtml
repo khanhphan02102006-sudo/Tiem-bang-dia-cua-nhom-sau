@@ -1,0 +1,67 @@
+@model VideoRentalMVC.ViewModels.ProfileViewModel
+
+@{
+    ViewData["Title"] = "Tài khoản";
+}
+
+<h2 class="page-title mb-3">Tùy chỉnh tài khoản</h2>
+
+@if (TempData["ProfileMessage"] is string message)
+{
+    <div class="alert alert-success auto-dismiss" role="alert">
+        <div>@message</div>
+        <div class="alert-progress"></div>
+    </div>
+}
+
+<div class="row fade-in-up">
+    <div class="col-lg-7">
+        <div class="form-shell">
+            <div class="detail-topbar">
+                <h5 class="section-header mb-0">Thông tin cá nhân</h5>
+                <a asp-action="ChangePassword" class="btn btn-outline-primary btn-sm"><i class="bi bi-shield-lock me-1"></i>Đổi mật khẩu</a>
+            </div>
+
+            <form asp-action="Profile" method="post" class="mt-2">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="UserName" class="form-label"></label>
+                    <input asp-for="UserName" class="form-control" readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="TenKhach" class="form-label"></label>
+                    <input asp-for="TenKhach" class="form-control" placeholder="Nhập tên hiển thị" />
+                    <span asp-validation-for="TenKhach" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DiaChi" class="form-label"></label>
+                    <input asp-for="DiaChi" class="form-control" placeholder="Nhập địa chỉ" />
+                    <span asp-validation-for="DiaChi" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label"></label>
+                    <input asp-for="Email" class="form-control" placeholder="Nhập email (không bắt buộc)" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="Nhập số điện thoại" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                </div>
+
+                <div class="action-bar">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

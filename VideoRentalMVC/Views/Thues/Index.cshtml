@@ -1,0 +1,275 @@
+@model IEnumerable<VideoRentalMVC.Models.Thue>
+
+@{
+    ViewData["Title"] = "Danh sách Thuê";
+    var currentStatus = (string?)ViewBag.CurrentStatusFilter;
+    var currentSort = (string?)ViewBag.CurrentSort;
+    var currentPageSize = (int)ViewBag.PageSize;
+    var currentPage = (int)ViewBag.CurrentPage;
+    var totalItems = (int)ViewBag.TotalItems;
+
+    var tongBanGhi = Model.Count();
+    var soDaTra = Model.Count(t => t.NgayTra != null);
+    var soQuaHan = Model.Count(t => t.NgayTra == null && t.HanTra.Date < DateTime.Today);
+    var soSapToiHan = Model.Count(t => t.NgayTra == null && t.HanTra.Date >= DateTime.Today && (t.HanTra.Date - DateTime.Today).Days <= 1);
+    var soDangThue = Model.Count(t => t.NgayTra == null && t.HanTra.Date >= DateTime.Today && (t.HanTra.Date - DateTime.Today).Days > 1);
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3 fade-in-up">
+    <h2 class="fw-bold text-primary mb-0">@ViewData["Title"]</h2>
+    <div class="d-flex gap-2">
+        <a asp-action="ExportCsv" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-statusFilter="@ViewBag.CurrentStatusFilter" asp-route-sortOrder="@ViewBag.CurrentSort" class="btn btn-secondary" asp-route-roleCheck="true"><i class="bi bi-download me-1"></i>Xuất CSV</a>
+        <a asp-action="Create" class="btn btn-success"><i class="bi bi-plus-circle me-1"></i>Tạo phiếu thuê</a>
+    </div>
+</div>
+
+<div class="legend-panel mb-2">
+    <div class="d-flex flex-wrap gap-2 align-items-center" id="thueStatusFilters">
+        <button type="button" class="soft-badge info thue-status-filter is-active" data-filter="all"><i class="bi bi-collection me-1"></i>Tổng hiển thị: @tongBanGhi</button>
+        <button type="button" class="soft-badge success thue-status-filter" data-filter="datra">Đã trả: @soDaTra</button>
+        <button type="button" class="soft-badge warning thue-status-filter" data-filter="dangthue">Đang thuê: @soDangThue</button>
+        <button type="button" class="soft-badge danger thue-status-filter" data-filter="quahan">Quá hạn: @soQuaHan</button>
+        <button type="button" class="soft-badge neutral thue-status-filter" data-filter="saptoihan">Sắp tới hạn: @soSapToiHan</button>
+    </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2 mb-2">
+    <a asp-action="Index" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-pageSize="@currentPageSize" class="filter-chip @(string.IsNullOrEmpty(currentStatus) ? "active" : string.Empty)">Tất cả</a>
+    <a asp-action="Index" asp-route-statusFilter="dangthue" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-pageSize="@currentPageSize" class="filter-chip @(currentStatus == "dangthue" ? "active" : string.Empty)">Đang thuê</a>
+    <a asp-action="Index" asp-route-statusFilter="saptoihan" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-pageSize="@currentPageSize" class="filter-chip @(currentStatus == "saptoihan" ? "active" : string.Empty)">Sắp tới hạn</a>
+    <a asp-action="Index" asp-route-statusFilter="quahan" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-pageSize="@currentPageSize" class="filter-chip @(currentStatus == "quahan" ? "active" : string.Empty)">Quá hạn</a>
+    <a asp-action="Index" asp-route-statusFilter="datra" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-pageSize="@currentPageSize" class="filter-chip @(currentStatus == "datra" ? "active" : string.Empty)">Đã trả</a>
+</div>
+
+<form method="get" class="row g-2 mb-2 js-stateful-filter" data-list-key="thues-index">
+    <div class="col-md-4">
+        <input type="text" name="searchString" value="@ViewBag.CurrentFilter" class="form-control" placeholder="Tìm theo băng hoặc khách" />
+    </div>
+    <div class="col-md-3">
+        <select name="statusFilter" class="form-select">
+            <option value="" selected="@(string.IsNullOrEmpty(currentStatus))">Tất cả trạng thái</option>
+            <option value="dangthue" selected="@(currentStatus == "dangthue")">Đang thuê</option>
+            <option value="saptoihan" selected="@(currentStatus == "saptoihan")">Sắp tới hạn</option>
+            <option value="quahan" selected="@(currentStatus == "quahan")">Quá hạn</option>
+            <option value="datra" selected="@(currentStatus == "datra")">Đã trả</option>
+        </select>
+    </div>
+    <div class="col-md-2">
+        <select name="pageSize" class="form-select js-page-size-select">
+            <option value="8" selected="@(currentPageSize == 8)">8 dòng</option>
+            <option value="12" selected="@(currentPageSize == 12)">12 dòng</option>
+            <option value="20" selected="@(currentPageSize == 20)">20 dòng</option>
+            <option value="50" selected="@(currentPageSize == 50)">50 dòng</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <input type="hidden" name="sortOrder" value="@ViewBag.CurrentSort" />
+        <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Lọc</button>
+        <a asp-action="Index" asp-route-pageSize="@currentPageSize" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-1"></i>Xóa lọc</a>
+    </div>
+</form>
+<small class="text-muted d-block mb-3">Lọc nhanh theo trạng thái và từ khóa để tìm phiếu chính xác hơn.</small>
+
+@if (Model.Any())
+{
+    <div class="card shadow-sm fade-in-up">
+        <div class="card-body p-0">
+            <div class="table-shell">
+                <table class="table table-bordered table-striped table-hover mb-0 ui-table-modern table-sticky">
+                    <thead class="table-dark">
+                        <tr>
+                            <th class="sticky-first">Băng</th>
+                            <th>Khách</th>
+                            <th>
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.DateSort" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-statusFilter="@ViewBag.CurrentStatusFilter" asp-route-pageSize="@currentPageSize">
+                                    @Html.DisplayNameFor(model => model.NgayThue)
+                                    @if (currentSort == "date_asc") { <i class="bi bi-sort-up"></i> }
+                                    else if (currentSort == "date_desc") { <i class="bi bi-sort-down"></i> }
+                                </a>
+                            </th>
+                            <th>@Html.DisplayNameFor(model => model.HanTra)</th>
+                            <th>
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.RemainSort" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-statusFilter="@ViewBag.CurrentStatusFilter" asp-route-pageSize="@currentPageSize">
+                                    Còn lại
+                                    @if (currentSort == "remain_asc") { <i class="bi bi-sort-up"></i> }
+                                    else if (currentSort == "remain_desc") { <i class="bi bi-sort-down"></i> }
+                                </a>
+                            </th>
+                            <th>@Html.DisplayNameFor(model => model.NgayTra)</th>
+                            <th>
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.FeeSort" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-statusFilter="@ViewBag.CurrentStatusFilter" asp-route-pageSize="@currentPageSize">
+                                    @Html.DisplayNameFor(model => model.PhiTreHan)
+                                    @if (currentSort == "fee_asc") { <i class="bi bi-sort-up"></i> }
+                                    else if (currentSort == "fee_desc") { <i class="bi bi-sort-down"></i> }
+                                </a>
+                            </th>
+                            <th>
+                                <a asp-action="Index" asp-route-sortOrder="@ViewBag.TotalSort" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-statusFilter="@ViewBag.CurrentStatusFilter" asp-route-pageSize="@currentPageSize">
+                                    @Html.DisplayNameFor(model => model.TongTien)
+                                    @if (currentSort == "total_asc") { <i class="bi bi-sort-up"></i> }
+                                    else if (currentSort == "total_desc") { <i class="bi bi-sort-down"></i> }
+                                </a>
+                            </th>
+                            <th>Trạng thái</th>
+                            <th class="sticky-action text-center">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="thueTableBody">
+                        @foreach (var item in Model)
+                        {
+                            var quaHan = item.NgayTra == null && item.HanTra.Date < DateTime.Today;
+                            var sapToiHan = item.NgayTra == null && !quaHan && (item.HanTra.Date - DateTime.Today).Days <= 1;
+                            var soNgayCon = (item.HanTra.Date - DateTime.Today).Days;
+                            var rowClass = quaHan ? "row-overdue" : (sapToiHan ? "row-near-due" : string.Empty);
+                            var statusKey = item.NgayTra != null ? "datra" : quaHan ? "quahan" : sapToiHan ? "saptoihan" : "dangthue";
+                            <tr class="@rowClass" data-status="@statusKey">
+                                <td class="sticky-first">@(item.MaBangNavigation?.TenBang)</td>
+                                <td>@(item.MaKhachNavigation?.TenKhach)</td>
+                                <td>@item.NgayThue.ToString("dd/MM/yyyy")</td>
+                                <td>@item.HanTra.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (item.NgayTra != null)
+                                    {
+                                        <span class="soft-badge neutral">Đã kết thúc</span>
+                                    }
+                                    else if (quaHan)
+                                    {
+                                        <span class="soft-badge danger">Trễ @Math.Abs(soNgayCon) ngày</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="soft-badge info">Còn @soNgayCon ngày</span>
+                                    }
+                                </td>
+                                <td>@(item.NgayTra?.ToString("dd/MM/yyyy") ?? "-")</td>
+                                <td>@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", item.PhiTreHan)</td>
+                                <td>@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", item.TongTien)</td>
+                                <td>
+                                    @if (item.NgayTra != null)
+                                    {
+                                        <span class="soft-badge success">Đã trả</span>
+                                    }
+                                    else if (quaHan)
+                                    {
+                                        <span class="soft-badge danger">Quá hạn</span>
+                                    }
+                                    else if (sapToiHan)
+                                    {
+                                        <span class="soft-badge warning">Sắp tới hạn</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="soft-badge info">Đang thuê</span>
+                                    }
+                                </td>
+                                <td class="sticky-action text-center">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info me-1 action-icon-btn icon-action-link action-view" aria-label="Chi tiết" data-bs-toggle="tooltip" data-bs-title="Chi tiết"><i class="bi bi-eye"></i></a>
+                                    @if (User.IsInRole("Admin"))
+                                    {
+                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1 action-icon-btn icon-action-link action-edit" aria-label="Sửa" data-bs-toggle="tooltip" data-bs-title="Sửa"><i class="bi bi-pencil-square"></i></a>
+                                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger action-icon-btn icon-action-link action-delete" aria-label="Xóa" data-bs-toggle="tooltip" data-bs-title="Xóa"><i class="bi bi-trash"></i></a>
+
+                                        if (item.NgayTra == null)
+                                        {
+                                            <form asp-action="TraBang" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-success ms-1 action-icon-btn action-done" aria-label="Trả" data-bs-toggle="tooltip" data-bs-title="Trả"><i class="bi bi-check2-circle"></i></button>
+                                            </form>
+                                            <form asp-action="GiaHan" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.Id" />
+                                                <input type="number" name="soNgay" value="3" min="1" max="30" class="form-control form-control-sm d-inline-block ms-1" style="width:75px" />
+                                                <button type="submit" class="btn btn-sm btn-outline-primary ms-1 action-icon-btn action-extend" aria-label="Gia hạn" data-bs-toggle="tooltip" data-bs-title="Gia hạn"><i class="bi bi-plus-square"></i></button>
+                                            </form>
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="empty-state">
+        <div class="icon">📄</div>
+        <div>Chưa có phiếu thuê nào để hiển thị.</div>
+    </div>
+}
+
+@if ((int)ViewBag.TotalPages > 1)
+{
+    var fromItem = (currentPage - 1) * currentPageSize + 1;
+    var toItem = Math.Min(currentPage * currentPageSize, totalItems);
+    var startPage = Math.Max(1, currentPage - 2);
+    var endPage = Math.Min((int)ViewBag.TotalPages, currentPage + 2);
+
+    <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+        <small class="text-muted">Hiển thị @fromItem - @toItem / @totalItems bản ghi</small>
+        <nav>
+            <ul class="pagination mb-0">
+                <li class="page-item @(currentPage == 1 ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="1" asp-route-pageSize="@currentPageSize" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-statusFilter="@ViewBag.CurrentStatusFilter">Đầu</a>
+                </li>
+                <li class="page-item @(currentPage == 1 ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Math.Max(1, currentPage - 1))" asp-route-pageSize="@currentPageSize" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-statusFilter="@ViewBag.CurrentStatusFilter">Trước</a>
+                </li>
+
+                @if (startPage > 1)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+
+                @for (var i = startPage; i <= endPage; i++)
+                {
+                    <li class="page-item @(i == currentPage ? "active" : string.Empty)">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-pageSize="@currentPageSize" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-statusFilter="@ViewBag.CurrentStatusFilter">@i</a>
+                    </li>
+                }
+
+                @if (endPage < (int)ViewBag.TotalPages)
+                {
+                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                }
+
+                <li class="page-item @(currentPage == (int)ViewBag.TotalPages ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@(Math.Min((int)ViewBag.TotalPages, currentPage + 1))" asp-route-pageSize="@currentPageSize" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-statusFilter="@ViewBag.CurrentStatusFilter">Sau</a>
+                </li>
+                <li class="page-item @(currentPage == (int)ViewBag.TotalPages ? "disabled" : string.Empty)">
+                    <a class="page-link" asp-action="Index" asp-route-page="@((int)ViewBag.TotalPages)" asp-route-pageSize="@currentPageSize" asp-route-searchString="@ViewBag.CurrentFilter" asp-route-sortOrder="@ViewBag.CurrentSort" asp-route-statusFilter="@ViewBag.CurrentStatusFilter">Cuối</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filterRoot = document.getElementById("thueStatusFilters");
+    const body = document.getElementById("thueTableBody");
+    if (!filterRoot || !body) {
+        return;
+    }
+
+    const buttons = Array.from(filterRoot.querySelectorAll(".thue-status-filter"));
+    const rows = Array.from(body.querySelectorAll("tr[data-status]"));
+
+    buttons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const filter = btn.getAttribute("data-filter") || "all";
+            buttons.forEach(x => x.classList.remove("is-active"));
+            btn.classList.add("is-active");
+
+            rows.forEach(row => {
+                const status = row.getAttribute("data-status") || "other";
+                const show = filter === "all" || filter === status;
+                row.style.display = show ? "" : "none";
+            });
+        });
+    });
+});
+</script>

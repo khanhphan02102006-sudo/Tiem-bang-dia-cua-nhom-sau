@@ -1,0 +1,33 @@
+@model VideoRentalMVC.Models.Khach
+
+@{
+    ViewData["Title"] = "Chi tiết khách";
+}
+
+<h2 class="page-title mb-3">Chi tiết khách</h2>
+
+<div class="glass-panel p-3 fade-in-up">
+    <div class="detail-topbar">
+        <h5 class="section-header mb-0">Thông tin khách</h5>
+        <span class="soft-badge neutral">Mã khách: #@Model.Id</span>
+    </div>
+
+    <dl class="row info-grid mb-2">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.TenKhach)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.TenKhach)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DiaChi)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.DiaChi)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.DienThoai)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.DienThoai)</dd>
+    </dl>
+
+    <div class="action-bar mt-3">
+        @if (User.IsInRole("Admin"))
+        {
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-primary btn-sm"><i class="bi bi-pencil-square me-1"></i>Sửa</a>
+        }
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+    </div>
+</div>

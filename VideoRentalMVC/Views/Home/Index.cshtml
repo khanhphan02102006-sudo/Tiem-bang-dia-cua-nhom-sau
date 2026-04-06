@@ -1,0 +1,348 @@
+@model VideoRentalMVC.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Tiệm băng đĩa của nhóm 6";
+    var tyLeQuaHan = Model.DangThue == 0 ? 0d : (double)Model.QuaHan / Model.DangThue * 100d;
+    var tyLeQuaHanClamped = Math.Min(100d, Math.Max(0d, tyLeQuaHan));
+    var canhBaoQuaHan = tyLeQuaHan >= 30d ? "Cao" : tyLeQuaHan >= 10d ? "Trung bình" : "Thấp";
+    var canhBaoKey = canhBaoQuaHan == "Cao" ? "cao" : canhBaoQuaHan == "Trung bình" ? "trungbinh" : "thap";
+    var featuredPosterUrl = (string?)ViewBag.FeaturedPosterUrl ?? Url.Content("~/images/poster-placeholder.svg");
+    var featuredPosterTitle = (string?)ViewBag.FeaturedPosterTitle ?? "Poster nổi bật";
+    var topGenres = ViewBag.TopGenres as IEnumerable<VideoRentalMVC.ViewModels.HomeGenreCardViewModel>;
+    var recentRentals = ViewBag.RecentRentals as IEnumerable<VideoRentalMVC.ViewModels.HomeRentalCardViewModel>;
+    var topFilms = ViewBag.TopFilms as IEnumerable<VideoRentalMVC.ViewModels.HomeTrendingFilmViewModel>;
+    var topGenreCount = topGenres?.Count() ?? 0;
+    var maxTopFilmRentals = Math.Max(1, topFilms?.Max(x => x.SoLanThue) ?? 1);
+
+    var overdueRecentCount = 0;
+    var nearDueRecentCount = 0;
+    var returnedRecentCount = 0;
+    var activeRecentCount = 0;
+
+    if (recentRentals != null)
+    {
+        foreach (var rental in recentRentals)
+        {
+            if (rental.Id <= 0)
+            {
+                continue;
+            }
+
+            if (rental.NgayTra != null)
+            {
+                returnedRecentCount++;
+                continue;
+            }
+
+            activeRecentCount++;
+            if (rental.IsOverdue)
+            {
+                overdueRecentCount++;
+            }
+            else if (rental.IsNearDue)
+            {
+                nearDueRecentCount++;
+            }
+        }
+    }
+
+    var overdueBadgeLiveClass = overdueRecentCount > 0 ? "badge-live-alert" : string.Empty;
+    var nearDueBadgeLiveClass = nearDueRecentCount > 0 ? "badge-live-warn" : string.Empty;
+    var activeBadgeLiveClass = activeRecentCount > 0 ? "badge-live-info" : string.Empty;
+}
+
+<section class="hero-panel fade-in-up mb-4 home-hero-clean home-v2-hero">
+    <div class="hero-content home-hero-grid">
+        <div>
+            <div class="home-v2-badge mb-2"><i class="bi bi-stars me-1"></i>Video Rental Lab</div>
+            <h1 class="hero-title mb-2">Quản lý tiệm băng đĩa trực quan, dễ dùng</h1>
+            <p class="hero-subtitle mb-3">Tập trung vào thao tác nhanh, giao diện sáng rõ và theo dõi dễ liệu thuê trả theo thời gian thực cho bài lab.</p>
+            <div class="d-flex flex-wrap gap-2 mb-3">
+                <a class="btn btn-primary" asp-controller="Thues" asp-action="Index"><i class="bi bi-journal-text me-1"></i>Phiếu thuê</a>
+                <a class="btn btn-outline-primary" asp-controller="Phims" asp-action="Index"><i class="bi bi-film me-1"></i>Kho phim</a>
+                <a class="btn btn-outline-secondary" asp-controller="Khaches" asp-action="Index"><i class="bi bi-people me-1"></i>Khách hàng</a>
+            </div>
+            <div class="d-flex flex-wrap gap-2 home-hero-facts">
+                <span class="soft-badge info"><i class="bi bi-camera-reels me-1"></i>@Model.TongPhim phim</span>
+                <span class="soft-badge success"><i class="bi bi-disc me-1"></i>@Model.TongBang băng</span>
+                <span class="soft-badge warning"><i class="bi bi-clock-history me-1"></i>@Model.DangThue đang thuê</span>
+                <span class="soft-badge danger"><i class="bi bi-exclamation-triangle me-1"></i>@Model.QuaHan quá hạn</span>
+            </div>
+        </div>
+        <div class="home-hero-visual">
+            <div class="home-hero-poster-frame">
+                <span class="home-hero-poster-glow glow-a" aria-hidden="true"></span>
+                <span class="home-hero-poster-glow glow-b" aria-hidden="true"></span>
+                <img src="@featuredPosterUrl" alt="@featuredPosterTitle" class="home-hero-poster-image" loading="eager" decoding="async" />
+                <div class="home-hero-poster-overlay">
+                    <span class="poster-chip"><i class="bi bi-image me-1"></i>@featuredPosterTitle</span>
+                    <strong>Poster nổi bật</strong>
+                    <small>Ảnh đang hiển thị được lấy từ danh sách phim hiện có.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="home-trending mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <h6 class="mb-0 fw-bold text-primary">Phim được thuê nhiều</h6>
+        <small class="text-muted">Xem nhanh những phim đang được quan tâm</small>
+    </div>
+    <div class="home-trending-grid">
+        @if (topFilms != null && topFilms.Any())
+        {
+            var trendingRank = 0;
+            foreach (var film in topFilms)
+            {
+                trendingRank++;
+                var popularity = (int)Math.Round((double)film.SoLanThue / maxTopFilmRentals * 100d);
+                var rankClass = trendingRank == 1 ? "is-top" : string.Empty;
+                if (film.Id > 0)
+                {
+                    <a class="home-trending-card text-decoration-none" asp-controller="Phims" asp-action="Details" asp-route-id="@film.Id">
+                        <span class="home-trending-rank @rankClass">#@trendingRank</span>
+                        <img src="@film.AnhBiaUrl" alt="@film.TenPhim" loading="lazy" decoding="async" />
+                        <div class="home-trending-card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <strong>@film.TenPhim</strong>
+                                <span class="soft-badge success">@film.SoLanThue</span>
+                            </div>
+                            <small>@film.TheLoai</small>
+                            <div class="home-trending-meter mt-2" aria-hidden="true"><span style="width:@popularity%"></span></div>
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div class="home-trending-card is-placeholder">
+                        <span class="home-trending-rank @rankClass">#@trendingRank</span>
+                        <img src="@film.AnhBiaUrl" alt="@film.TenPhim" loading="lazy" decoding="async" />
+                        <div class="home-trending-card-body">
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <strong>@film.TenPhim</strong>
+                                <span class="soft-badge neutral">@film.SoLanThue</span>
+                            </div>
+                            <small>@film.TheLoai</small>
+                            <div class="home-trending-meter mt-2" aria-hidden="true"><span style="width:@popularity%"></span></div>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+</section>
+
+<section class="row g-3 mb-3 home-v2-stats">
+    <div class="col-md-4">
+        <div class="home-v2-stat-card">
+            <div class="label">Tổng băng</div>
+            <div class="value">@Model.TongBang</div>
+            <small>Kho băng hiện có trong hệ thống</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="home-v2-stat-card">
+            <div class="label">Doanh thu tháng</div>
+            <div class="value">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("vi-VN"), "{0:N0} VNĐ", Model.DoanhThuThang)</div>
+            <small>Tổng tiền thu được trong tháng hiện tại</small>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="home-v2-stat-card">
+            <div class="label">Tỷ lệ quá hạn</div>
+            <div class="value">@tyLeQuaHan.ToString("0.#")%</div>
+            <small>Đo mức độ rủi ro cần xử lý</small>
+        </div>
+    </div>
+</section>
+
+<section class="home-activity mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <h6 class="mb-0 fw-bold text-primary">Hoạt động thuê gần đây</h6>
+        <small class="text-muted">Theo dõi phiếu mới nhất trong hệ thống</small>
+    </div>
+    <div class="home-activity-summary mb-2" id="homeActivityFilters">
+        <button type="button" class="soft-badge danger @overdueBadgeLiveClass home-activity-filter" data-filter="overdue"><i class="bi bi-exclamation-triangle me-1"></i>Quá hạn: @overdueRecentCount</button>
+        <button type="button" class="soft-badge warning @nearDueBadgeLiveClass home-activity-filter" data-filter="neardue"><i class="bi bi-hourglass-split me-1"></i>Sắp tới hạn: @nearDueRecentCount</button>
+        <button type="button" class="soft-badge success home-activity-filter" data-filter="returned"><i class="bi bi-check-circle me-1"></i>Đã trả: @returnedRecentCount</button>
+        <button type="button" class="soft-badge info @activeBadgeLiveClass home-activity-filter" data-filter="active"><i class="bi bi-journal-text me-1"></i>Đang thuê: @activeRecentCount</button>
+    </div>
+    <div class="home-activity-list home-activity-list-redesign" id="homeActivityList">
+        @if (recentRentals != null && recentRentals.Any())
+        {
+            foreach (var rental in recentRentals)
+            {
+                var statusClass = rental.Id == 0 ? "neutral" : rental.IsOverdue ? "danger" : rental.IsNearDue ? "warning" : rental.NgayTra != null ? "success" : "info";
+                var statusText = rental.Id == 0 ? "Chưa có dữ liệu" : rental.NgayTra != null ? "Đã trả" : rental.IsOverdue ? "Quá hạn" : rental.IsNearDue ? "Sắp tới hạn" : "Đang thuê";
+                var activityItemClass = statusClass == "danger" ? "home-activity-item--danger" : statusClass == "warning" ? "home-activity-item--warning" : statusClass == "success" ? "home-activity-item--success" : statusClass == "info" ? "home-activity-item--info" : "home-activity-item--neutral";
+                var filterStatus = rental.Id == 0 ? "neutral" : rental.NgayTra != null ? "returned" : rental.IsOverdue ? "overdue" : rental.IsNearDue ? "neardue" : "active";
+
+                if (rental.Id > 0)
+                {
+                    <a class="home-activity-item @activityItemClass" data-status="@filterStatus" asp-controller="Thues" asp-action="Details" asp-route-id="@rental.Id">
+                        <div class="home-activity-item-head">
+                            <div class="home-activity-item-main">
+                                <strong>@rental.TenBang</strong>
+                                <small>@rental.TenKhach</small>
+                            </div>
+                            <span class="soft-badge @statusClass">@statusText</span>
+                        </div>
+                        <div class="home-activity-item-foot">
+                            <small class="home-activity-date"><i class="bi bi-calendar-event me-1"></i>Hạn: @rental.HanTra.ToString("dd/MM/yyyy")</small>
+                        </div>
+                    </a>
+                }
+                else
+                {
+                    <div class="home-activity-item is-placeholder @activityItemClass" data-status="@filterStatus">
+                        <div class="home-activity-item-head">
+                            <div class="home-activity-item-main">
+                                <strong>@rental.TenBang</strong>
+                                <small>@rental.TenKhach</small>
+                            </div>
+                            <span class="soft-badge @statusClass">@statusText</span>
+                        </div>
+                        <div class="home-activity-item-foot">
+                            <small class="home-activity-date"><i class="bi bi-calendar-event me-1"></i>Hạn: @rental.HanTra.ToString("dd/MM/yyyy")</small>
+                        </div>
+                    </div>
+                }
+            }
+        }
+    </div>
+</section>
+
+<section class="home-quick-actions mb-3">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+        <h6 class="mb-0 fw-bold text-primary">Truy cập nhanh</h6>
+        <small class="text-muted">Một chạm để mở nhanh các khu vực chính</small>
+    </div>
+    <div class="home-quick-grid">
+        <a class="home-quick-card" asp-controller="Phims" asp-action="Index" data-quick="film">
+            <div class="home-quick-visual"><i class="bi bi-film"></i></div>
+            <div class="home-quick-art" aria-hidden="true"><i class="bi bi-camera-reels"></i></div>
+            <div>
+                <strong>Kho phim</strong>
+                <small>Danh mục, poster, chi tiết</small>
+            </div>
+        </a>
+        <a class="home-quick-card" asp-controller="Bangs" asp-action="Index" data-quick="tape">
+            <div class="home-quick-visual"><i class="bi bi-disc"></i></div>
+            <div class="home-quick-art" aria-hidden="true"><i class="bi bi-vinyl"></i></div>
+            <div>
+                <strong>Kho băng</strong>
+                <small>Tình trạng băng trong hệ thống</small>
+            </div>
+        </a>
+        <a class="home-quick-card" asp-controller="Khaches" asp-action="Index" data-quick="customer">
+            <div class="home-quick-visual"><i class="bi bi-people"></i></div>
+            <div class="home-quick-art" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
+            <div>
+                <strong>Khách hàng</strong>
+                <small>Thông tin và lịch sử thuê</small>
+            </div>
+        </a>
+        <a class="home-quick-card" asp-controller="Thues" asp-action="Index" data-quick="rental">
+            <div class="home-quick-visual"><i class="bi bi-receipt"></i></div>
+            <div class="home-quick-art" aria-hidden="true"><i class="bi bi-journal-check"></i></div>
+            <div>
+                <strong>Phiếu thuê</strong>
+                <small>Theo dõi và xử lý hạn trả</small>
+            </div>
+        </a>
+    </div>
+</section>
+
+<section class="row g-3 mb-3">
+    <div class="col-md-4">
+        <div class="home-tip-card">
+            <h6><i class="bi bi-lightning-charge me-1"></i>Mẹo thao tác nhanh</h6>
+            <p class="mb-0">Dùng ô tìm kiếm + bộ lọc để rút ngắn thời gian tìm dữ liệu.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="home-tip-card">
+            <h6><i class="bi bi-shield-check me-1"></i>Kiểm soát quá hạn</h6>
+            <p class="mb-0">Ưu tiên xử lý phiếu có ngày quá hạn cao để giảm rủi ro.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="home-tip-card">
+            <h6><i class="bi bi-palette me-1"></i>Chế độ giao diện</h6>
+            <p class="mb-0">Nút góc phải cho phép chuyển Light/Dark nhanh theo nhu cầu.</p>
+        </div>
+    </div>
+</section>
+
+<section class="mb-3 home-v2-health">
+    <div class="home-v2-health-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="mb-0"><i class="bi bi-activity me-1"></i>Tình trạng vận hành hôm nay</h6>
+            <span class="home-health-level level-@canhBaoKey">Rủi ro: @canhBaoQuaHan</span>
+        </div>
+        <div class="home-health-bar" role="progressbar" aria-label="Tỷ lệ quá hạn" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@((int)Math.Round(tyLeQuaHanClamped))">
+            <span style="width:@(((int)Math.Round(tyLeQuaHanClamped)).ToString())%"></span>
+        </div>
+        <small class="d-block mt-2">Hiện có <strong>@Model.DangThue</strong> phiếu đang thuê, trong đó <strong>@Model.QuaHan</strong> phiếu quá hạn.</small>
+    </div>
+</section>
+
+@if (User.IsInRole("Admin"))
+{
+    <section class="glass-panel p-3 fade-in-up home-admin-zone">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <h5 class="mb-1">Khu vực quản trị</h5>
+                <small class="text-muted">Theo dõi thống kê và vận hành tổng quát hệ thống.</small>
+            </div>
+            <a class="btn btn-outline-primary home-dashboard-btn" asp-controller="Thues" asp-action="BaoCao"><i class="bi bi-speedometer2 me-1"></i>Mở Dashboard</a>
+        </div>
+    </section>
+}
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const filterRoot = document.getElementById("homeActivityFilters");
+    const list = document.getElementById("homeActivityList");
+    if (!filterRoot || !list) {
+        return;
+    }
+
+    const buttons = Array.from(filterRoot.querySelectorAll(".home-activity-filter"));
+    const items = Array.from(list.querySelectorAll(".home-activity-item"));
+
+    function matchesFilter(itemStatus, filter) {
+        if (filter === "active") {
+            return itemStatus === "active" || itemStatus === "overdue" || itemStatus === "neardue";
+        }
+        return itemStatus === filter;
+    }
+
+    function applyFilter(filter) {
+        items.forEach(item => {
+            const status = item.getAttribute("data-status") || "neutral";
+            const show = matchesFilter(status, filter);
+            item.classList.toggle("is-filtered-out", !show);
+        });
+    }
+
+    buttons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const isActive = btn.classList.contains("is-active");
+            buttons.forEach(x => x.classList.remove("is-active"));
+
+            if (isActive) {
+                items.forEach(item => item.classList.remove("is-filtered-out"));
+                return;
+            }
+
+            btn.classList.add("is-active");
+            const filter = btn.getAttribute("data-filter");
+            if (filter) {
+                applyFilter(filter);
+            }
+        });
+    });
+});
+</script>

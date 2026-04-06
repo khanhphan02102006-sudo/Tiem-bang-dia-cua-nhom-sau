@@ -1,0 +1,67 @@
+@model VideoRentalMVC.Models.Thue
+
+@{
+    ViewData["Title"] = "Tạo phiếu thuê";
+    var isAdmin = ViewBag.IsAdmin == true;
+}
+
+<h2 class="page-title mb-3">Tạo phiếu thuê</h2>
+
+<div class="row fade-in-up">
+    <div class="col-md-6">
+        <div class="form-shell">
+            <form asp-action="Create">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-group">
+                    <label asp-for="MaBang" class="control-label"></label>
+                    <select asp-for="MaBang" class="form-control" asp-items="ViewBag.MaBang"></select>
+                    <span asp-validation-for="MaBang" class="text-danger"></span>
+                </div>
+
+                @if (isAdmin)
+                {
+                    <div class="form-group">
+                        <label asp-for="MaKhach" class="control-label"></label>
+                        <select asp-for="MaKhach" class="form-control" asp-items="ViewBag.MaKhach"></select>
+                        <span asp-validation-for="MaKhach" class="text-danger"></span>
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label asp-for="NgayThue" class="control-label"></label>
+                    <input asp-for="NgayThue" class="form-control" />
+                    <span asp-validation-for="NgayThue" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="HanTra" class="control-label"></label>
+                    <input asp-for="HanTra" class="form-control" />
+                    <span asp-validation-for="HanTra" class="text-danger"></span>
+                </div>
+
+                @if (isAdmin)
+                {
+                    <div class="form-group">
+                        <label asp-for="NgayTra" class="control-label"></label>
+                        <input asp-for="NgayTra" class="form-control" />
+                        <span asp-validation-for="NgayTra" class="text-danger"></span>
+                    </div>
+                    <div class="form-group form-check mt-1">
+                        <label class="form-check-label">
+                            <input class="form-check-input" asp-for="DaTraTienThue" /> @Html.DisplayNameFor(model => model.DaTraTienThue)
+                        </label>
+                    </div>
+                }
+
+                <div class="form-group mt-3 action-bar">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i>Tạo phiếu</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

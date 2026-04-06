@@ -1,0 +1,47 @@
+@model VideoRentalMVC.Models.Bang
+
+@{
+    ViewData["Title"] = "Chỉnh sửa băng";
+}
+
+<h2 class="page-title mb-3">Chỉnh sửa băng</h2>
+
+<div class="row fade-in-up">
+    <div class="col-lg-6">
+        <div class="form-shell">
+            <div class="detail-topbar">
+                <h5 class="section-header mb-0">Thông tin băng</h5>
+                <span class="soft-badge neutral">Mã băng: #@Model.Id</span>
+            </div>
+
+            <form asp-action="Edit">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <div class="form-group mb-2">
+                    <label asp-for="MaPhim" class="control-label"></label>
+                    <select asp-for="MaPhim" class="form-control" asp-items="ViewBag.MaPhim"></select>
+                    <span asp-validation-for="MaPhim" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="TenBang" class="control-label"></label>
+                    <input asp-for="TenBang" class="form-control" />
+                    <span asp-validation-for="TenBang" class="text-danger"></span>
+                </div>
+                <div class="form-group mb-2">
+                    <label asp-for="TinhTrang" class="control-label"></label>
+                    <select asp-for="TinhTrang" class="form-control" asp-items="ViewBag.TinhTrangList"></select>
+                    <span asp-validation-for="TinhTrang" class="text-danger"></span>
+                </div>
+                <div class="form-group mt-3 action-bar">
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check2-circle me-1"></i>Lưu thay đổi</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Quay lại danh sách</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
