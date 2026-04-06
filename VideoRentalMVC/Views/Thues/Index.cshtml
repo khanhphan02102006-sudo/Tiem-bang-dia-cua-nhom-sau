@@ -1,7 +1,7 @@
 @model IEnumerable<VideoRentalMVC.Models.Thue>
 
 @{
-    ViewData["Title"] = "Danh sách Thuê";
+    ViewData["Title"] = "Danh s\u00e1ch Thu\u00ea";
     var currentStatus = (string?)ViewBag.CurrentStatusFilter;
     var currentSort = (string?)ViewBag.CurrentSort;
     var currentPageSize = (int)ViewBag.PageSize;
@@ -110,8 +110,8 @@
                                     else if (currentSort == "total_desc") { <i class="bi bi-sort-down"></i> }
                                 </a>
                             </th>
-                            <th>Trạng thái</th>
-                            <th class="sticky-action text-center">Hành động</th>
+                            <th>Tr\u1ea1ng th\u00e1i</th>
+                            <th class="sticky-action text-center">H\u00e0nh \u0111\u1ed9ng</th>
                         </tr>
                     </thead>
                     <tbody id="thueTableBody">

@@ -45,13 +45,13 @@ namespace VideoRentalMVC.Models
                 .HasOne(b => b.Phim)
                 .WithMany(p => p.Bangs)
                 .HasForeignKey(b => b.MaPhim)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Thue>()
                 .HasOne(t => t.MaBangNavigation)
                 .WithMany(b => b.Thues)
                 .HasForeignKey(t => t.MaBang)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Thue>()
                 .HasOne(t => t.MaKhachNavigation)

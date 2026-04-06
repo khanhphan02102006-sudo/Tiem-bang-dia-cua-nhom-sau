@@ -1638,3 +1638,120 @@ body {
   opacity: 0.9 !important;
 }
 
+/* ========== DELETE CONFIRMATION MODAL V1 ========== */
+#confirmActionModal .modal-content {
+  border: 1px solid rgba(121, 160, 224, 0.32);
+  background: rgba(255, 255, 255, 0.98);
+  box-shadow: 0 16px 32px rgba(18, 42, 86, 0.18);
+  border-radius: 14px;
+}
+
+#confirmActionModal .modal-header {
+  border-bottom: 1px solid rgba(121, 160, 224, 0.28);
+  background: rgba(226, 74, 103, 0.08);
+  padding: 1.2rem 1.5rem;
+}
+
+#confirmActionModal .modal-title {
+  color: #244574;
+  font-weight: 700;
+  letter-spacing: 0.15px;
+}
+
+#confirmActionModal .modal-body {
+  padding: 1.4rem 1.5rem;
+  color: #244574;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: center;
+}
+
+#confirmActionModal .modal-footer {
+  border-top: 1px solid rgba(121, 160, 224, 0.28);
+  padding: 0.9rem 1.5rem;
+  background: rgba(242, 248, 255, 0.5);
+  gap: 0.8rem;
+  justify-content: center;
+}
+
+#confirmActionModal .btn {
+  min-width: 96px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: transform var(--vr-motion-fast) ease, box-shadow var(--vr-motion-fast) ease;
+}
+
+#confirmActionModal .btn-outline-secondary {
+  color: #244574 !important;
+  border-color: #7ca5e5 !important;
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+#confirmActionModal .btn-outline-secondary:hover {
+  background: rgba(74, 123, 216, 0.08) !important;
+  border-color: #5f88d4 !important;
+  transform: translateY(-1px);
+}
+
+#confirmActionModal .btn-danger {
+  background: #e24a67 !important;
+  border-color: #e24a67 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 10px rgba(226, 74, 103, 0.24);
+}
+
+#confirmActionModal .btn-danger:hover {
+  background: #d63d5a !important;
+  border-color: #d63d5a !important;
+  box-shadow: 0 8px 16px rgba(226, 74, 103, 0.32);
+  transform: translateY(-1px);
+}
+
+/* Dark theme - Delete Confirmation Modal */
+.dark-theme #confirmActionModal .modal-content {
+  background: rgba(20, 34, 58, 0.95);
+  border-color: rgba(89, 124, 188, 0.38);
+  box-shadow: 0 18px 36px rgba(2, 10, 24, 0.42);
+}
+
+.dark-theme #confirmActionModal .modal-header {
+  background: rgba(226, 74, 103, 0.12);
+  border-bottom-color: rgba(226, 74, 103, 0.28);
+}
+
+.dark-theme #confirmActionModal .modal-title {
+  color: #e8f1ff;
+}
+
+.dark-theme #confirmActionModal .modal-body {
+  color: #dceaff;
+}
+
+.dark-theme #confirmActionModal .modal-footer {
+  border-top-color: rgba(126, 167, 233, 0.24);
+  background: rgba(15, 29, 53, 0.6);
+}
+
+.dark-theme #confirmActionModal .btn-outline-secondary {
+  color: #d5e6ff !important;
+  border-color: #5a7fb9 !important;
+  background: rgba(33, 57, 97, 0.28) !important;
+}
+
+.dark-theme #confirmActionModal .btn-outline-secondary:hover {
+  background: rgba(69, 101, 156, 0.4) !important;
+  border-color: #8fb2e7 !important;
+}
+
+.dark-theme #confirmActionModal .btn-danger {
+  background: #ee5d79 !important;
+  border-color: #ee5d79 !important;
+  box-shadow: 0 6px 14px rgba(238, 93, 121, 0.28);
+}
+
+.dark-theme #confirmActionModal .btn-danger:hover {
+  background: #eb4c6b !important;
+  border-color: #eb4c6b !important;
+  box-shadow: 0 10px 20px rgba(238, 93, 121, 0.36);
+}
+

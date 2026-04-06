@@ -6,7 +6,12 @@ using VideoRentalMVC.Models;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // Ensure UTF-8 text encoding
+    var stringFormatter = new Microsoft.AspNetCore.Mvc.Formatters.StringOutputFormatter();
+    options.OutputFormatters.Add(stringFormatter);
+});
 builder.Services.AddDbContext<VideoRentalDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("VideoRentalConnection"),
@@ -38,10 +43,13 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 var app = builder.Build();
 
-// Set UTF-8 encoding for all responses
+// Set UTF-8 encoding header for all HTML responses
 app.Use(async (context, next) =>
 {
-    context.Response.ContentType = "text/html; charset=utf-8";
+    if (context.Request.Path.HasValue)
+    {
+        context.Response.ContentType = "text/html; charset=utf-8";
+    }
     await next();
 });
 

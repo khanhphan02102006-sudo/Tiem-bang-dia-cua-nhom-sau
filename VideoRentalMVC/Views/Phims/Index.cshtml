@@ -1,6 +1,6 @@
 ﻿@model IEnumerable<VideoRentalMVC.Models.Phim>
 @{
-    ViewData["Title"] = "Danh sách Phim";
+    ViewData["Title"] = "Danh s\u00e1ch Phim";
     var currentPage = (int)ViewBag.CurrentPage;
     var totalPages = (int)ViewBag.TotalPages;
     var pageSize = (int)ViewBag.PageSize;
@@ -44,9 +44,9 @@
                             <th>Nước SX</th>
                             <th>Phim Bộ/Lẻ</th>
                             <th><a class="text-white" asp-action="Index" asp-route-sortOrder="@ViewBag.PriceSort" asp-route-searchString="@ViewBag.CurrentFilter">Giá Vốn</a></th>
-                            <th><a class="text-white" asp-action="Index" asp-route-sortOrder="@ViewBag.YearSort" asp-route-searchString="@ViewBag.CurrentFilter">Năm SX</a></th>
-                            <th>Thể loại</th>
-                            <th class="text-center sticky-action">Hành động</th>
+                            <th><a class="text-white" asp-action="Index" asp-route-sortOrder="@ViewBag.YearSort" asp-route-searchString="@ViewBag.CurrentFilter">N\u0103m SX</a></th>
+                            <th>Th\u1ec3 lo\u1ea1i</th>
+                            <th class="text-center sticky-action">H\u00e0nh \u0111\u1ed9ng</th>
                         </tr>
                     </thead>
                     <tbody>
